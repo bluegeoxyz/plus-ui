@@ -1,0 +1,4 @@
+export interface MaterialCategoryVO extends BaseEntity { id: number | string; companyId: number | string; companyName?: string; parentId: number | string; ancestors?: string; categoryCode: string; categoryName: string; sort?: number; status: string; remark?: string; children?: MaterialCategoryVO[] }
+export interface MaterialCategoryForm { id?: number | string; companyId?: number | string; parentId: number | string; categoryCode: string; categoryName: string; sort?: number; status: string; remark?: string }
+export interface MaterialCategoryQuery { companyId?: number | string; parentId?: number | string; categoryCode?: string; categoryName?: string; status?: string }
+export interface MaterialCategoryOptionVO { id: number | string; companyId: number | string; parentId: number | string; categoryCode: string; categoryName: string; children?: MaterialCategoryOptionVO[] }

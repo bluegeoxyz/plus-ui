@@ -1,0 +1,2 @@
+export interface ProjectManagementGrantVO extends BaseEntity { id: number | string; principalType: 'USER' | 'ROLE'; principalId: number | string; scopeType: 'ALL' | 'PROJECT'; projectId: number | string; status: string; version: number; }
+export interface ProjectManagementGrantForm { principalType: 'USER' | 'ROLE'; principalId: number | string; scopeType: 'ALL' | 'PROJECT'; projectId?: number | string; remark?: string; }

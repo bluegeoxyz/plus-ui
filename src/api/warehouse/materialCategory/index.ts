@@ -1,0 +1,15 @@
+import type { AxiosPromise } from '@/utils/api-types';
+import request from '@/utils/request';
+import type { MaterialCategoryForm, MaterialCategoryOptionVO, MaterialCategoryQuery, MaterialCategoryVO } from './types';
+const baseUrl = '/warehouse/materialCategory';
+export const listMaterialCategory = (params: MaterialCategoryQuery): AxiosPromise<MaterialCategoryVO[]> => request({ url: `${baseUrl}/list`, method: 'get', params });
+export const getMaterialCategory = (id: number | string): AxiosPromise<MaterialCategoryVO> => request({ url: `${baseUrl}/${id}`, method: 'get' });
+export const getMaterialCategoryEditContext = (id: number | string): AxiosPromise<MaterialCategoryForm> => request({ url: `${baseUrl}/${id}/context/edit`, method: 'get' });
+export const addMaterialCategory = (data: MaterialCategoryForm) => request({ url: baseUrl, method: 'post', data });
+export const updateMaterialCategory = (data: MaterialCategoryForm) => request({ url: baseUrl, method: 'put', data });
+export const changeMaterialCategoryStatus = (data: Pick<MaterialCategoryForm, 'id' | 'status'>) => request({ url: `${baseUrl}/changeStatus`, method: 'put', data });
+export const delMaterialCategory = (ids: number | string | (number | string)[]) => request({ url: `${baseUrl}/${ids}`, method: 'delete' });
+export const materialCategoryOptions = (companyId?: number | string): AxiosPromise<MaterialCategoryOptionVO[]> => request({ url: `${baseUrl}/options`, method: 'get', params: { companyId } });
+export const materialCategoryQueryCompanyOptions = (): AxiosPromise<import('@/api/warehouse/material/types').CompanyOptionVO[]> => request({ url: `${baseUrl}/context/query/companies`, method: 'get' });
+export const materialCategoryMaintainCompanyOptions = (): AxiosPromise<import('@/api/warehouse/material/types').CompanyOptionVO[]> => request({ url: `${baseUrl}/context/maintain/companies`, method: 'get' });
+export const materialCategoryMaintainCategoryOptions = (companyId?: number | string): AxiosPromise<MaterialCategoryOptionVO[]> => request({ url: `${baseUrl}/context/maintain/categories`, method: 'get', params: { companyId } });

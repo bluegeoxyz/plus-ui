@@ -9,6 +9,8 @@ import auth from '@/plugins/auth';
 import router, { constantRoutes, dynamicRoutes } from '@/router';
 import store from '@/store';
 import { createCustomNameComponent } from '@/utils/createCustomNameComponent';
+import { createDynamicRouteRegistry, createLatestRequestGuard } from '@/router/dynamicRouteRegistry';
+import { isHttp } from '@/utils/validate';
 
 // 匹配views里面所有的.vue文件，预建查找表避免每次 O(n) 扫描
 const modules = import.meta.glob('./../../views/**/*.vue');
@@ -25,6 +27,9 @@ export const usePermissionStore = defineStore('permission', () => {
   const defaultRoutes = ref<RouteRecordRaw[]>([]);
   const topbarRouters = ref<RouteRecordRaw[]>([]);
   const sidebarRouters = ref<RouteRecordRaw[]>([]);
+  const registeredRouteNames = ref<string[]>([]);
+  const routeRegistry = createDynamicRouteRegistry(router);
+  const requestGuard = createLatestRequestGuard();
 
   const getRoutes = (): RouteRecordRaw[] => {
     return routes.value as RouteRecordRaw[];
@@ -53,7 +58,9 @@ export const usePermissionStore = defineStore('permission', () => {
     sidebarRouters.value = routes;
   };
   const generateRoutes = async (): Promise<RouteRecordRaw[]> => {
+    const requestVersion = requestGuard.begin();
     const res = await getRouters();
+    if (!requestGuard.isCurrent(requestVersion)) return [];
     const data = Array.isArray(res.data) ? res.data : [];
     const sdata = structuredClone(data);
     const rdata = structuredClone(data);
@@ -62,9 +69,8 @@ export const usePermissionStore = defineStore('permission', () => {
     const rewriteRoutes = filterAsyncRouter(rdata, undefined, true);
     const defaultRoutes = filterAsyncRouter(defaultData);
     const asyncRoutes = filterDynamicRoutes(dynamicRoutes);
-    asyncRoutes.forEach(route => {
-      router.addRoute(route);
-    });
+    routeRegistry.register([...asyncRoutes, ...rewriteRoutes].filter(route => !isHttp(route.path)));
+    registeredRouteNames.value = routeRegistry.getNames().map(String);
     setRoutes(rewriteRoutes);
     setSidebarRouters(constantRoutes.concat(sidebarRoutes));
     setDefaultRoutes(sidebarRoutes);
@@ -72,6 +78,17 @@ export const usePermissionStore = defineStore('permission', () => {
     // 路由name重复检查
     duplicateRouteChecker(asyncRoutes, sidebarRoutes);
     return rewriteRoutes;
+  };
+
+  const resetRoutes = (): void => {
+    requestGuard.invalidate();
+    routeRegistry.removeAll();
+    registeredRouteNames.value = [];
+    routes.value = [...constantRoutes];
+    addRoutes.value = [];
+    defaultRoutes.value = [];
+    topbarRouters.value = [];
+    sidebarRouters.value = [...constantRoutes];
   };
 
   /**
@@ -125,6 +142,7 @@ export const usePermissionStore = defineStore('permission', () => {
     topbarRouters,
     sidebarRouters,
     defaultRoutes,
+    registeredRouteNames,
 
     getRoutes,
     getDefaultRoutes,
@@ -133,6 +151,7 @@ export const usePermissionStore = defineStore('permission', () => {
 
     setRoutes,
     generateRoutes,
+    resetRoutes,
     setSidebarRouters
   };
 });

@@ -2,12 +2,12 @@
   <div class="register">
     <div class="register-shell">
       <section class="register-brand">
-        <span class="brand-pill">Plus UI Workspace</span>
-        <h1 class="brand-title">企业级后台管理系统</h1>
+        <span class="brand-pill">JINGDAO PROPERTY</span>
+        <h1 class="brand-title">景道物业管理平台</h1>
         <p class="brand-desc">
-          真正面向企业级的应用框架 组件化 模块化 轻耦合 高扩展 针对企业痛点 业界一流技术栈
+          连接项目、房屋、住户、收费与仓储业务，构建统一的企业级物业管理工作台。
           <br />
-          重写 RuoYi-Vue 所有功能 集成 Sa-Token、Mybatis-Plus、WarmFlow、SpringDoc、Hutool、OSS 定期同步。
+          智慧物业 · 高效运营
         </p>
         <div class="brand-highlights">
           <span v-for="item in highlights" :key="item" class="highlight-chip">{{ item }}</span>
@@ -101,7 +101,7 @@
     </div>
 
     <div class="el-register-footer">
-      <span>Copyright © 2018-{{ currentYear }} 疯狂的狮子Li All Rights Reserved.</span>
+      <span>© 景道 · 物业管理平台</span>
     </div>
   </div>
 </template>
@@ -113,13 +113,12 @@ import { getCodeImg, register } from '@/api/login';
 import { RegisterForm } from '@/api/types';
 
 const title = import.meta.env.VITE_APP_TITLE;
-const currentYear = new Date().getFullYear();
 const quickStats = [
-  { label: '细粒度权限管理', value: '动态权限控制' },
-  { label: '主流技术栈', value: '全栈技术集成' },
-  { label: 'UI样式', value: '卡片式' }
+  { label: '业务协同', value: '统一工作台' },
+  { label: '项目管理', value: '清晰可控' },
+  { label: '运营服务', value: '高效便捷' }
 ];
-const highlights = ['技术栈全面升级', '动态菜单', '多主题布局', '深浅色主题'];
+const highlights = ['项目管理', '房屋管理', '收费管理', '仓储管理'];
 const router = useRouter();
 
 const { t } = useI18n();

@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import animateConfig from '@/animate';
-import logo from '@/assets/logo/logo.png';
+import logo from '@/assets/brand/logo.png';
 import { NavTypeEnum } from '@/enums/NavTypeEnum';
 import { useSettingsStore } from '@/store/modules/settings';
 
@@ -74,12 +74,12 @@ const logoTextColor = computed(() => (isDarkSide.value ? '#f8fbff' : 'var(--app-
     border: 1px solid v-bind(logoBorder);
 
     & .sidebar-logo {
-      width: 28px;
+      width: 32px;
       height: 28px;
       vertical-align: middle;
       margin-right: 0;
       margin-left: 0;
-      border-radius: 10px;
+      object-fit: contain;
       box-shadow: none;
     }
 

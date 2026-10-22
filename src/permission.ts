@@ -5,9 +5,10 @@ import 'nprogress/nprogress.css';
 import { usePermissionStore } from '@/store/modules/permission';
 import { useSettingsStore } from '@/store/modules/settings';
 import { useUserStore } from '@/store/modules/user';
+import { useCurrentProjectStore } from '@/store/modules/currentProject';
 import { getToken } from '@/utils/auth';
 import { isHandledRequestError, isRelogin } from '@/utils/request';
-import { isHttp, isPathMatch } from '@/utils/validate';
+import { isPathMatch } from '@/utils/validate';
 import router from './router';
 
 const NProgress = ('default' in NProgressModule ? NProgressModule.default : NProgressModule) as typeof NProgressModule;
@@ -42,13 +43,8 @@ router.beforeEach(async (to, from) => {
           return { path: '/' };
         } else {
           isRelogin.show = false;
-          const accessRoutes = await usePermissionStore().generateRoutes();
-          // 根据roles权限生成可访问的路由表
-          accessRoutes.forEach(route => {
-            if (!isHttp(route.path)) {
-              router.addRoute(route); // 动态添加可访问路由表
-            }
-          });
+          await usePermissionStore().generateRoutes();
+          await useCurrentProjectStore().initialize();
           // hack方法 确保addRoutes已完成
           return {
             path: to.path,

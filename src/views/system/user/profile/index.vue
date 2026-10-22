@@ -104,6 +104,14 @@ import UserAvatar from './userAvatar.vue';
 import UserInfo from './userInfo.vue';
 
 const activeTab = ref('userinfo');
+const route = useRoute();
+watch(
+  () => route.query.tab,
+  tab => {
+    if (tab === 'resetPwd') activeTab.value = 'resetPwd';
+  },
+  { immediate: true }
+);
 interface State {
   user: Partial<UserVO>;
   roleGroup: string;

@@ -1,8 +1,7 @@
 export default {
   // 路由国际化
   route: {
-    dashboard: 'Dashboard',
-    document: 'Document'
+    dashboard: 'Dashboard'
   },
   // 登录页面国际化
   login: {
@@ -12,7 +11,6 @@ export default {
     logging: 'Logging...',
     code: 'Verification Code',
     rememberPassword: 'Remember me',
-    switchRegisterPage: 'Sign up now',
     rule: {
       username: {
         required: 'Please enter your account'
@@ -23,13 +21,6 @@ export default {
       code: {
         required: 'Please enter a verification code'
       }
-    },
-    social: {
-      wechat: 'Wechat Login',
-      maxkey: 'MaxKey Login',
-      topiam: 'TopIam Login',
-      gitee: 'Gitee Login',
-      github: 'Github Login'
     }
   },
   // 注册页面国际化
@@ -66,10 +57,7 @@ export default {
     full: 'Full Screen',
     language: 'Language',
     dashboard: 'Dashboard',
-    document: 'Document',
     message: 'Message',
-    layoutSize: 'Layout Size',
-    layoutSetting: 'Layout Setting',
     personalCenter: 'Personal Center',
     logout: 'Logout'
   }

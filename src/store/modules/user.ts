@@ -7,6 +7,9 @@ import type { RuoYiAjaxResult } from '@/utils/api-types';
 import { getInfo as getUserInfo, login as loginApi, logout as logoutApi } from '@/api/login';
 import defAva from '@/assets/images/profile.jpg';
 import { getToken, removeToken, setToken } from '@/utils/auth';
+import { useCurrentProjectStore } from './currentProject';
+import { usePermissionStore } from './permission';
+import { useTagsViewStore } from './tagsView';
 
 export const useUserStore = defineStore('user', () => {
   const token = ref(getToken());
@@ -16,6 +19,18 @@ export const useUserStore = defineStore('user', () => {
   const avatar = ref('');
   const roles = ref<Array<string>>([]); // 用户角色编码集合 → 判断路由权限
   const permissions = ref<Array<string>>([]); // 用户权限编码集合 → 判断按钮权限
+
+  const resetAuthorizationState = (): void => {
+    usePermissionStore().resetRoutes();
+    useTagsViewStore().resetNavigationState();
+    useCurrentProjectStore().reset();
+    name.value = '';
+    nickname.value = '';
+    userId.value = '';
+    avatar.value = '';
+    roles.value = [];
+    permissions.value = [];
+  };
 
   /**
    * 登录
@@ -29,6 +44,7 @@ export const useUserStore = defineStore('user', () => {
       if (!data?.access_token) {
         return Promise.reject(err);
       }
+      resetAuthorizationState();
       setToken(data.access_token);
       token.value = data.access_token;
       return Promise.resolve();
@@ -65,10 +81,9 @@ export const useUserStore = defineStore('user', () => {
 
   // 注销
   const logout = async (): Promise<void> => {
-    await logoutApi();
+    await to(logoutApi());
+    resetAuthorizationState();
     token.value = '';
-    roles.value = [];
-    permissions.value = [];
     removeToken();
   };
 

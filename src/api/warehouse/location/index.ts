@@ -1,0 +1,17 @@
+import type { PageResult } from '@/api/types';
+import type { AxiosPromise } from '@/utils/api-types';
+import request from '@/utils/request';
+import type { WarehouseLocationForm, WarehouseLocationOptionVO, WarehouseLocationQuery, WarehouseLocationStatusForm, WarehouseLocationVO } from './types';
+const baseUrl = '/warehouse/location';
+export const listWarehouseLocation = (query: WarehouseLocationQuery): AxiosPromise<PageResult<WarehouseLocationVO>> => request({ url: `${baseUrl}/list`, method: 'get', params: query });
+export const getWarehouseLocation = (id: number | string): AxiosPromise<WarehouseLocationVO> => request({ url: `${baseUrl}/${id}`, method: 'get' });
+export const getWarehouseLocationEditContext = (id: number | string): AxiosPromise<WarehouseLocationForm> => request({ url: `${baseUrl}/${id}/context/edit`, method: 'get' });
+export const addWarehouseLocation = (data: WarehouseLocationForm) => request({ url: baseUrl, method: 'post', data });
+export const updateWarehouseLocation = (data: WarehouseLocationForm) => request({ url: baseUrl, method: 'put', data });
+export const changeWarehouseLocationStatus = (data: WarehouseLocationStatusForm) => request({ url: `${baseUrl}/changeStatus`, method: 'put', data });
+export const delWarehouseLocation = (ids: number | string | (number | string)[]) => request({ url: `${baseUrl}/${ids}`, method: 'delete' });
+export const warehouseLocationOptions = (warehouseId: number | string, zoneId?: number | string): AxiosPromise<WarehouseLocationOptionVO[]> => request({ url: `${baseUrl}/options`, method: 'get', params: { warehouseId, zoneId } });
+export const warehouseLocationQueryWarehouseOptions = (): AxiosPromise<import('@/api/warehouse/warehouse/types').WarehouseOptionVO[]> => request({ url: `${baseUrl}/context/query/warehouses`, method: 'get' });
+export const warehouseLocationQueryZoneOptions = (warehouseId: number | string): AxiosPromise<import('@/api/warehouse/zone/types').WarehouseZoneOptionVO[]> => request({ url: `${baseUrl}/context/query/zones`, method: 'get', params: { warehouseId } });
+export const warehouseLocationMaintainWarehouseOptions = (): AxiosPromise<import('@/api/warehouse/warehouse/types').WarehouseOptionVO[]> => request({ url: `${baseUrl}/context/maintain/warehouses`, method: 'get' });
+export const warehouseLocationMaintainZoneOptions = (warehouseId: number | string): AxiosPromise<import('@/api/warehouse/zone/types').WarehouseZoneOptionVO[]> => request({ url: `${baseUrl}/context/maintain/zones`, method: 'get', params: { warehouseId } });

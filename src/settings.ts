@@ -21,7 +21,7 @@ const setting: DefaultSettings = {
   /**
    * 默认布局
    */
-  navType: NavTypeEnum.LEFT,
+  navType: NavTypeEnum.MIX,
 
   /**
    * 是否显示 tagsView

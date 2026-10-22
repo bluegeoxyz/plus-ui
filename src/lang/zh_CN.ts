@@ -1,8 +1,7 @@
 export default {
   // 路由国际化
   route: {
-    dashboard: '首页',
-    document: '项目文档'
+    dashboard: '首页'
   },
   // 登录页面国际化
   login: {
@@ -12,7 +11,6 @@ export default {
     logging: '登 录 中...',
     code: '验证码',
     rememberPassword: '记住我',
-    switchRegisterPage: '立即注册',
     rule: {
       username: {
         required: '请输入您的账号'
@@ -23,13 +21,6 @@ export default {
       code: {
         required: '请输入验证码'
       }
-    },
-    social: {
-      wechat: '微信登录',
-      maxkey: 'MaxKey登录',
-      topiam: 'TopIam登录',
-      gitee: 'Gitee登录',
-      github: 'Github登录'
     }
   },
   // 注册页面国际化
@@ -66,10 +57,7 @@ export default {
     full: '全屏',
     language: '语言',
     dashboard: '首页',
-    document: '项目文档',
     message: '消息',
-    layoutSize: '布局大小',
-    layoutSetting: '布局设置',
     personalCenter: '个人中心',
     logout: '退出登录'
   }

@@ -1,0 +1,11 @@
+import type {PageResult} from '@/api/types'; import type {AxiosPromise} from '@/utils/api-types'; import request,{download} from '@/utils/request'; import type {ReceivableBatchVO,ReceivableGenerateForm,ReceivableGenerationResultVO,ReceivablePaymentVO,ReceivableQuery,ReceivableSummaryVO,ReceivableVO} from './types'; import type {ChargeItemOptionVO} from '@/api/property/charge/item/types';
+const base='/property/receivable';
+export const receivableContextChargeItems=(projectId:number|string):AxiosPromise<ChargeItemOptionVO[]>=>request({url:`${base}/context/query/charge-items`,method:'get',params:{projectId}});
+export const listReceivable=(q:ReceivableQuery):AxiosPromise<PageResult<ReceivableVO>>=>request({url:`${base}/list`,method:'get',params:q});
+export const getReceivable=(id:number|string):AxiosPromise<ReceivableVO>=>request({url:`${base}/${id}`,method:'get'});
+export const getReceivablePayments=(id:number|string):AxiosPromise<ReceivablePaymentVO[]>=>request({url:`${base}/${id}/payments`,method:'get'});
+export const getReceivableSummary=(q:ReceivableQuery):AxiosPromise<ReceivableSummaryVO>=>request({url:`${base}/summary`,method:'get',params:q});
+export const generateReceivable=(data:ReceivableGenerateForm):AxiosPromise<ReceivableGenerationResultVO>=>request({url:`${base}/generate`,method:'post',data});
+export const cancelReceivable=(id:number|string,cancelReason:string)=>request({url:`${base}/${id}/cancel`,method:'put',data:{cancelReason}});
+export const listReceivableBatch=(q:{projectId:number|string;generateMonth?:string;status?:string;pageNum:number;pageSize:number}):AxiosPromise<PageResult<ReceivableBatchVO>>=>request({url:`${base}/batch/list`,method:'get',params:q});
+export const exportReceivable=(q:ReceivableQuery)=>download(`${base}/export`,q,`receivable_${Date.now()}.xlsx`);

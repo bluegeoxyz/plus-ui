@@ -1,6 +1,10 @@
 <template>
   <div class="navbar" :class="'nav' + navType">
     <div class="navbar-left">
+      <router-link v-if="navType === NavTypeEnum.MIX" to="/" class="zbm-brand" aria-label="景道物业管理平台首页">
+        <img :src="appLogo" alt="景道" />
+        <span>景道物业</span>
+      </router-link>
       <div v-if="navType !== NavTypeEnum.TOP" class="hamburger-shell">
         <hamburger
           id="hamburger-container"
@@ -24,12 +28,7 @@
     </div>
     <div class="right-menu flex align-center">
       <template v-if="appStore.device !== 'mobile'">
-        <search-menu ref="searchMenuRef" />
-        <el-tooltip content="搜索" effect="dark" placement="bottom">
-          <div class="right-menu-item hover-effect" @click="openSearchMenu">
-            <svg-icon class-name="search-icon" icon-class="search" />
-          </div>
-        </el-tooltip>
+        <current-project-switcher v-if="currentProjectStore.required" class="project-switcher-slot" />
         <!-- 消息 -->
         <el-tooltip :content="$t('navbar.message')" effect="dark" placement="bottom">
           <div>
@@ -47,24 +46,8 @@
             </el-popover>
           </div>
         </el-tooltip>
-        <el-tooltip content="Github" effect="dark" placement="bottom">
-          <ruo-yi-git id="ruoyi-git" class="right-menu-item hover-effect" />
-        </el-tooltip>
-
-        <el-tooltip :content="$t('navbar.document')" effect="dark" placement="bottom">
-          <ruo-yi-doc id="ruoyi-doc" class="right-menu-item hover-effect" />
-        </el-tooltip>
-
         <el-tooltip :content="$t('navbar.full')" effect="dark" placement="bottom">
           <screenfull id="screenfull" class="right-menu-item hover-effect" />
-        </el-tooltip>
-
-        <el-tooltip :content="$t('navbar.language')" effect="dark" placement="bottom">
-          <lang-select id="lang-select" class="right-menu-item hover-effect" />
-        </el-tooltip>
-
-        <el-tooltip :content="$t('navbar.layoutSize')" effect="dark" placement="bottom">
-          <size-select id="size-select" class="right-menu-item hover-effect" />
         </el-tooltip>
       </template>
       <div class="avatar-container">
@@ -82,9 +65,7 @@
               <router-link to="/user/profile">
                 <el-dropdown-item>{{ $t('navbar.personalCenter') }}</el-dropdown-item>
               </router-link>
-              <el-dropdown-item v-if="settingsStore.showSettings" command="setLayout">
-                <span>{{ $t('navbar.layoutSetting') }}</span>
-              </el-dropdown-item>
+              <el-dropdown-item command="resetPwd">修改密码</el-dropdown-item>
               <el-dropdown-item divided command="logout">
                 <span>{{ $t('navbar.logout') }}</span>
               </el-dropdown-item>
@@ -99,7 +80,7 @@
 <script setup lang="ts">
 import type { ElMessageBoxOptions } from 'element-plus';
 import { CaretBottom } from '@element-plus/icons-vue';
-import appLogo from '@/assets/logo/logo.png';
+import appLogo from '@/assets/brand/logo.png';
 import { NavTypeEnum } from '@/enums/NavTypeEnum';
 import tab from '@/plugins/tab';
 import router from '@/router';
@@ -107,25 +88,20 @@ import { useAppStore } from '@/store/modules/app';
 import { useNoticeStore } from '@/store/modules/notice';
 import { useSettingsStore } from '@/store/modules/settings';
 import { useUserStore } from '@/store/modules/user';
+import { useCurrentProjectStore } from '@/store/modules/currentProject';
 import notice from './notice/index.vue';
 import TopBar from './TopBar/index.vue';
-import SearchMenu from './TopBar/search.vue';
+import CurrentProjectSwitcher from './CurrentProjectSwitcher.vue';
 
 const appStore = useAppStore();
 const userStore = useUserStore();
+const currentProjectStore = useCurrentProjectStore();
 const settingsStore = useSettingsStore();
 const noticeStore = storeToRefs(useNoticeStore());
 
 const navType = computed(() => settingsStore.navType);
 const showLogo = computed(() => settingsStore.sidebarLogo);
 const displayName = computed(() => userStore.nickname || '管理员');
-
-// 搜索菜单
-const searchMenuRef = ref<InstanceType<typeof SearchMenu>>();
-
-const openSearchMenu = () => {
-  searchMenuRef.value?.openSearch();
-};
 
 const toggleSideBar = () => {
   appStore.toggleSideBar(false);
@@ -148,13 +124,12 @@ const logout = async () => {
   });
 };
 
-const emits = defineEmits(['setLayout']);
-const setLayout = () => {
-  emits('setLayout');
+const resetPwd = () => {
+  router.push({ path: '/user/profile', query: { tab: 'resetPwd' } });
 };
 // 定义Command方法对象 通过key直接调用方法
 const commandMap: { [key: string]: any } = {
-  setLayout,
+  resetPwd,
   logout
 };
 const handleCommand = (command: string) => {
@@ -263,6 +238,26 @@ const handleCommand = (command: string) => {
     gap: 10px;
     flex: 1;
   }
+
+  .zbm-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--app-text-title);
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    img {
+      width: 34px;
+      height: 28px;
+      object-fit: contain;
+    }
+  }
+
+  .project-switcher-slot { flex-shrink: 0; }
 
   .hamburger-shell {
     width: 36px;

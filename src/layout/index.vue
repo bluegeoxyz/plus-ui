@@ -4,11 +4,10 @@
     <side-bar v-if="showSidebar" class="sidebar-container" />
     <div :class="{ hasTagsView: needTagsView, sidebarHide: sidebar.hide }" class="main-container">
       <div :class="{ 'fixed-header': fixedHeader }" class="layout-header">
-        <navbar @set-layout="setLayout" />
+        <navbar />
         <tags-view v-if="needTagsView" />
       </div>
       <app-main :class="{ 'with-fixed-header': fixedHeader, 'with-tags-view': needTagsView }" />
-      <settings ref="settingRef" />
     </div>
   </div>
 </template>
@@ -18,7 +17,7 @@ import { NavTypeEnum } from '@/enums/NavTypeEnum';
 import { useAppStore } from '@/store/modules/app';
 import { useSettingsStore } from '@/store/modules/settings';
 import { initMessageBox, initPush } from '@/utils/push';
-import { AppMain, Navbar, Settings, TagsView } from './components';
+import { AppMain, Navbar, TagsView } from './components';
 import SideBar from './components/Sidebar/index.vue';
 
 const settingsStore = useSettingsStore();
@@ -58,8 +57,6 @@ watch(
   { immediate: true }
 );
 
-const settingRef = ref<InstanceType<typeof Settings>>();
-
 onMounted(async () => {
   try {
     await initMessageBox();
@@ -72,9 +69,6 @@ const handleClickOutside = () => {
   useAppStore().closeSideBar({ withoutAnimation: false });
 };
 
-const setLayout = () => {
-  settingRef.value?.openSetting();
-};
 </script>
 
 <style lang="scss" scoped>

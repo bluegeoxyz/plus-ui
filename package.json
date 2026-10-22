@@ -19,7 +19,9 @@
     "fmt": "oxfmt .",
     "lint": "oxlint src",
     "lint:fix": "oxlint --fix src",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
     "@element-plus/icons-vue": "2.3.2",

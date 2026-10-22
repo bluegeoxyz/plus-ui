@@ -1,0 +1,7 @@
+import type { PageResult } from '@/api/types'; import type { AxiosPromise } from '@/utils/api-types'; import request,{download} from '@/utils/request'; import type {ResidentQuery,ResidentRelationVO,ResidentDetailVO,ResidentBuildingOptionVO,ResidentUnitOptionVO,ResidentRoomOptionVO} from './types';
+export const listResident=(query:ResidentQuery):AxiosPromise<PageResult<ResidentRelationVO>>=>request({url:'/property/resident/list',method:'get',params:query});
+export const getResident=(customerId:number|string,projectId:number|string):AxiosPromise<ResidentDetailVO>=>request({url:`/property/resident/${customerId}`,method:'get',params:{projectId}});
+export const exportResident=(query:ResidentQuery)=>download('/property/resident/export',query,`resident_${Date.now()}.xlsx`);
+export const residentBuildingOptions=(projectId:number|string):AxiosPromise<ResidentBuildingOptionVO[]>=>request({url:'/property/resident/context/query/buildings',method:'get',params:{projectId}});
+export const residentUnitOptions=(projectId:number|string,buildingId:number|string):AxiosPromise<ResidentUnitOptionVO[]>=>request({url:'/property/resident/context/query/units',method:'get',params:{projectId,buildingId}});
+export const residentRoomOptions=(projectId:number|string,buildingId:number|string,unitId:number|string):AxiosPromise<ResidentRoomOptionVO[]>=>request({url:'/property/resident/context/query/rooms',method:'get',params:{projectId,buildingId,unitId}});

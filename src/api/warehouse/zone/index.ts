@@ -1,0 +1,15 @@
+import type { PageResult } from '@/api/types';
+import type { AxiosPromise } from '@/utils/api-types';
+import request from '@/utils/request';
+import type { WarehouseZoneForm, WarehouseZoneOptionVO, WarehouseZoneQuery, WarehouseZoneStatusForm, WarehouseZoneVO } from './types';
+const baseUrl = '/warehouse/zone';
+export const listWarehouseZone = (query: WarehouseZoneQuery): AxiosPromise<PageResult<WarehouseZoneVO>> => request({ url: `${baseUrl}/list`, method: 'get', params: query });
+export const getWarehouseZone = (id: number | string): AxiosPromise<WarehouseZoneVO> => request({ url: `${baseUrl}/${id}`, method: 'get' });
+export const getWarehouseZoneEditContext = (id: number | string): AxiosPromise<WarehouseZoneForm> => request({ url: `${baseUrl}/${id}/context/edit`, method: 'get' });
+export const addWarehouseZone = (data: WarehouseZoneForm) => request({ url: baseUrl, method: 'post', data });
+export const updateWarehouseZone = (data: WarehouseZoneForm) => request({ url: baseUrl, method: 'put', data });
+export const changeWarehouseZoneStatus = (data: WarehouseZoneStatusForm) => request({ url: `${baseUrl}/changeStatus`, method: 'put', data });
+export const delWarehouseZone = (ids: number | string | (number | string)[]) => request({ url: `${baseUrl}/${ids}`, method: 'delete' });
+export const warehouseZoneOptions = (warehouseId: number | string): AxiosPromise<WarehouseZoneOptionVO[]> => request({ url: `${baseUrl}/options`, method: 'get', params: { warehouseId } });
+export const warehouseZoneQueryWarehouseOptions = (): AxiosPromise<import('@/api/warehouse/warehouse/types').WarehouseOptionVO[]> => request({ url: `${baseUrl}/context/query/warehouses`, method: 'get' });
+export const warehouseZoneMaintainWarehouseOptions = (): AxiosPromise<import('@/api/warehouse/warehouse/types').WarehouseOptionVO[]> => request({ url: `${baseUrl}/context/maintain/warehouses`, method: 'get' });

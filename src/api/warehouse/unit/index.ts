@@ -1,0 +1,13 @@
+import type { PageResult } from '@/api/types';
+import type { AxiosPromise } from '@/utils/api-types';
+import request from '@/utils/request';
+import type { UnitForm, UnitOptionVO, UnitQuery, UnitVO } from './types';
+const baseUrl = '/warehouse/unit';
+export const listUnit = (params: UnitQuery): AxiosPromise<PageResult<UnitVO>> => request({ url: `${baseUrl}/list`, method: 'get', params });
+export const getUnit = (id: number | string): AxiosPromise<UnitVO> => request({ url: `${baseUrl}/${id}`, method: 'get' });
+export const getUnitEditContext = (id: number | string): AxiosPromise<UnitForm> => request({ url: `${baseUrl}/${id}/context/edit`, method: 'get' });
+export const addUnit = (data: UnitForm) => request({ url: baseUrl, method: 'post', data });
+export const updateUnit = (data: UnitForm) => request({ url: baseUrl, method: 'put', data });
+export const changeUnitStatus = (data: Pick<UnitForm, 'id' | 'status'>) => request({ url: `${baseUrl}/changeStatus`, method: 'put', data });
+export const delUnit = (ids: number | string | (number | string)[]) => request({ url: `${baseUrl}/${ids}`, method: 'delete' });
+export const unitOptions = (): AxiosPromise<UnitOptionVO[]> => request({ url: `${baseUrl}/options`, method: 'get' });

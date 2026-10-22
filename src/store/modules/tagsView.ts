@@ -244,6 +244,13 @@ export const useTagsViewStore = defineStore('tagsView', () => {
     });
   };
 
+  const resetNavigationState = (): void => {
+    visitedViews.value = [];
+    cachedViews.value = [];
+    iframeViews.value = [];
+    clearVisitedViews();
+  };
+
   const updateVisitedView = (view: RouteLocationNormalized): void => {
     for (let v of visitedViews.value) {
       if (v.path === view.path) {
@@ -327,6 +334,7 @@ export const useTagsViewStore = defineStore('tagsView', () => {
     delAllViews,
     delAllVisitedViews,
     delAllCachedViews,
+    resetNavigationState,
     delOthersViews,
     delRightTags,
     delLeftTags,

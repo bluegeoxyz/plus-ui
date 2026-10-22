@@ -2,110 +2,89 @@
   <div class="home">
     <section class="hero-panel">
       <div class="hero-copy">
-        <h1>RuoYi-Vue-Plus 控制台</h1>
-        <p>
-          企业级后台管理系统 重写 RuoYi-Vue 所有功能 集成 Sa-Token、Mybatis-Plus、WarmFlow、SpringDoc、Hutool、OSS
-          等组件
-        </p>
-        <div class="hero-actions">
-          <el-button type="primary" @click="goTarget('https://gitee.com/dromara/RuoYi-Vue-Plus')">查看源码</el-button>
-          <el-button plain @click="goTarget('https://plus-doc.dromara.org/#/ruoyi-vue-plus/changlog')">
-            更新日志
-          </el-button>
+        <span class="hero-badge">JINGDAO PROPERTY</span>
+        <h1>{{ greeting }}，{{ displayName }}</h1>
+        <p>欢迎使用景道物业管理平台。{{ projectMessage }}</p>
+        <div class="hero-meta">
+          <span><el-icon><Calendar /></el-icon>{{ currentDate }}</span>
+          <span v-if="currentProjectStore.currentProjectName"><el-icon><Location /></el-icon>当前项目：{{ currentProjectStore.currentProjectName }}</span>
         </div>
+      </div>
+      <img :src="brandLogo" class="hero-logo" alt="景道" />
+    </section>
+
+    <section class="section-card">
+      <div class="section-head">
+        <div><span class="section-kicker">BUSINESS OVERVIEW</span><h2>业务概览</h2><p>当前未接入首页聚合统计接口，不发起额外业务请求，避免越权与虚构数据。</p></div>
+      </div>
+      <div class="overview-grid">
+        <article v-for="item in overviewItems" :key="item.title" class="overview-card">
+          <div class="overview-icon"><el-icon><component :is="item.icon" /></el-icon></div>
+          <h3>{{ item.title }}</h3><span>{{ item.description }}</span>
+          <el-tag :type="item.available ? 'success' : 'info'" effect="light">{{ item.available ? '已授权' : '暂无入口' }}</el-tag>
+        </article>
       </div>
     </section>
 
-    <div class="content-grid">
-      <section class="section-card">
-        <div class="section-head">
-          <div>
-            <h2>项目矩阵</h2>
-          </div>
-        </div>
-        <div class="product-list">
-          <article v-for="product in products" :key="product.name" class="product-card">
-            <div class="product-top">
-              <div>
-                <h3>{{ product.name }}</h3>
-                <p>{{ product.summary }}</p>
-              </div>
-              <span class="product-version">{{ product.version }}</span>
-            </div>
-            <div class="product-tags">
-              <el-tag v-for="tag in product.tags" :key="tag" effect="plain">{{ tag }}</el-tag>
-            </div>
-            <div class="product-actions">
-              <el-button type="primary" plain @click="goTarget(product.primaryUrl)">
-                {{ product.primaryLabel }}
-              </el-button>
-              <el-button plain @click="goTarget(product.secondaryUrl)">{{ product.secondaryLabel }}</el-button>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="section-card capability-card">
-        <div class="section-head">
-          <div>
-            <h2>能力地图</h2>
-          </div>
-        </div>
-        <div class="capability-groups">
-          <article v-for="group in capabilityGroups" :key="group.title" class="capability-group">
-            <h3>{{ group.title }}</h3>
-            <ul>
-              <li v-for="item in group.items" :key="item">{{ item }}</li>
-            </ul>
-          </article>
-        </div>
-      </section>
-    </div>
+    <section class="section-card">
+      <div class="section-head">
+        <div><span class="section-kicker">QUICK ACCESS</span><h2>常用功能</h2><p>入口来自当前账号的动态菜单，仅展示已授权功能。</p></div>
+      </div>
+      <div v-if="quickLinks.length" class="shortcut-grid">
+        <button v-for="item in quickLinks" :key="item.path" type="button" class="shortcut-card" @click="openMenu(item.path)">
+          <span class="shortcut-icon"><svg-icon v-if="item.icon" :icon-class="item.icon" /><el-icon v-else><Grid /></el-icon></span>
+          <span class="shortcut-copy"><strong>{{ item.title }}</strong><small>进入功能</small></span>
+          <el-icon class="shortcut-arrow"><ArrowRight /></el-icon>
+        </button>
+      </div>
+      <el-empty v-else description="当前账号暂无可用业务菜单" :image-size="88" />
+    </section>
   </div>
 </template>
 
 <script setup name="Index" lang="ts">
-const products = [
-  {
-    name: 'RuoYi-Vue-Plus',
-    version: 'v6.0.0',
-    summary: '面向分布式集群场景的后台管理系统，保持现有业务接口与权限逻辑，适合先完成前端壳升级。',
-    tags: ['Vue 3', 'Element Plus', 'Spring Boot', 'Sa-Token'],
-    primaryLabel: '访问 GitHub',
-    primaryUrl: 'https://github.com/dromara/RuoYi-Vue-Plus',
-    secondaryLabel: '查看更新日志',
-    secondaryUrl: 'https://plus-doc.dromara.org/#/ruoyi-vue-plus/changlog'
-  },
-  {
-    name: 'RuoYi-Cloud-Plus',
-    version: 'v6.0.0',
-    summary: '微服务通用权限管理系统，适合更复杂的服务治理场景，也可以沿用同样的前端升级思路。',
-    tags: ['Spring Cloud', 'Gateway', 'Nacos', 'Dubbo'],
-    primaryLabel: '访问 GitHub',
-    primaryUrl: 'https://github.com/dromara/RuoYi-Cloud-Plus',
-    secondaryLabel: '查看更新日志',
-    secondaryUrl: 'https://plus-doc.dromara.org/#/ruoyi-cloud-plus/changlog'
-  }
-];
+import { ArrowRight, Calendar, Grid, House, Location, Money, OfficeBuilding, User, Van } from '@element-plus/icons-vue';
+import brandLogo from '@/assets/brand/logo.png';
+import router from '@/router';
+import { useCurrentProjectStore } from '@/store/modules/currentProject';
+import { usePermissionStore } from '@/store/modules/permission';
+import { useUserStore } from '@/store/modules/user';
+import {
+  BUSINESS_ENTRY_PATHS,
+  collectAuthorizedMenuLinks,
+  findAuthorizedBusinessEntry,
+  type AuthorizedMenuRoute
+} from './homeMenu';
 
-const capabilityGroups = [
-  {
-    title: '后端基建',
-    items: ['Spring Boot / Spring Cloud', 'Sa-Token 认证与权限', 'MySQL / Redis', '代码生成器']
-  },
-  {
-    title: '平台能力',
-    items: ['动态菜单与按钮权限', '监控、日志、在线用户', '任务调度与工作流', '文件存储与多云适配']
-  },
-  {
-    title: '前端方向',
-    items: ['UI 卡片化', '主题与布局统一', '通用页面容器规范化', '企业化布局']
-  }
-];
+const userStore = useUserStore();
+const permissionStore = usePermissionStore();
+const currentProjectStore = useCurrentProjectStore();
+const displayName = computed(() => userStore.nickname || '用户');
+const currentDate = new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }).format(new Date());
+const greeting = computed(() => {
+  const hour = new Date().getHours();
+  if (hour < 6) return '夜深了';
+  if (hour < 12) return '上午好';
+  if (hour < 18) return '下午好';
+  return '晚上好';
+});
+const projectMessage = computed(() => {
+  if (!currentProjectStore.required) return '您可以从已授权菜单开始处理日常工作。';
+  if (currentProjectStore.currentProjectName) return `当前工作范围为“${currentProjectStore.currentProjectName}”。`;
+  return '请先在顶部选择当前物业项目，再开展项目级业务。';
+});
 
-const goTarget = (url: string) => {
-  window.open(url, '__blank');
-};
+const authorizedLinks = computed(() => collectAuthorizedMenuLinks(permissionStore.defaultRoutes as AuthorizedMenuRoute[]));
+const quickLinks = computed(() => authorizedLinks.value.slice(0, 8));
+const hasBusinessEntry = (paths: readonly string[]) => Boolean(findAuthorizedBusinessEntry(authorizedLinks.value, [...paths]));
+const overviewItems = computed(() => [
+  { title: '项目概况', description: '按当前账号授权范围进入项目管理', icon: OfficeBuilding, available: hasBusinessEntry(BUSINESS_ENTRY_PATHS.project) },
+  { title: '房屋与入住', description: '房屋、楼栋及入住关系管理入口', icon: House, available: hasBusinessEntry(BUSINESS_ENTRY_PATHS.resource) },
+  { title: '业主与住户', description: '客户、业主及住户资料管理入口', icon: User, available: hasBusinessEntry(BUSINESS_ENTRY_PATHS.customer) },
+  { title: '收费管理', description: '应收、收款及收费规则管理入口', icon: Money, available: hasBusinessEntry(BUSINESS_ENTRY_PATHS.charge) },
+  { title: '仓库库存', description: '物料、库存及出入库管理入口', icon: Van, available: hasBusinessEntry(BUSINESS_ENTRY_PATHS.warehouse) }
+]);
+const openMenu = (path: string) => router.push(path);
 </script>
 
 <style lang="scss" scoped>
@@ -367,4 +346,53 @@ html.dark {
     background: radial-gradient(circle at top left, rgba(53, 109, 255, 0.18), transparent 30%), var(--app-surface-bg);
   }
 }
+
+.hero-panel {
+  position: relative;
+  min-height: 230px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(246, 251, 255, 0.98) 0%, rgba(242, 250, 255, 0.86) 48%, rgba(242, 250, 255, 0.22) 100%),
+    url('@/assets/brand/background.png') center / cover no-repeat;
+}
+
+.hero-copy { position: relative; z-index: 1; max-width: 760px; }
+.hero-copy h1 { margin: 18px 0 10px; color: #17345c; }
+.hero-copy p { color: #526b8c; }
+.hero-meta { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 22px; color: #3e5f87; font-size: 13px; }
+.hero-meta span { display: inline-flex; align-items: center; gap: 7px; }
+.hero-logo { position: absolute; right: 5%; width: min(280px, 28vw); max-height: 170px; object-fit: contain; opacity: 0.22; }
+.section-head p { margin: 6px 0 0; color: var(--app-text-muted); font-size: 13px; line-height: 1.6; }
+.overview-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+.overview-card { min-width: 0; padding: 18px; border-radius: 18px; background: var(--app-elevated-soft-bg); border: 1px solid var(--app-surface-border); }
+.overview-icon { width: 40px; height: 40px; display: grid; place-items: center; margin-bottom: 16px; border-radius: 13px; color: #1677ff; background: rgba(22, 119, 255, 0.1); font-size: 20px; }
+.overview-card h3 { margin: 0 0 7px; color: var(--app-text-title); font-size: 16px; }
+.overview-card > span { display: block; min-height: 40px; color: var(--app-text-muted); font-size: 12px; line-height: 1.6; }
+.overview-card .el-tag { margin-top: 14px; }
+.shortcut-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.shortcut-card { display: flex; align-items: center; gap: 13px; padding: 16px; color: inherit; text-align: left; border: 1px solid var(--app-surface-border); border-radius: 18px; background: var(--app-elevated-soft-bg); cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
+.shortcut-card:hover { transform: translateY(-2px); border-color: rgba(22, 119, 255, 0.28); box-shadow: var(--app-shadow-sm); }
+.shortcut-icon { width: 40px; height: 40px; flex: 0 0 40px; display: grid; place-items: center; border-radius: 13px; color: #fff; background: linear-gradient(135deg, #1677ff, #20c9d2); font-size: 18px; }
+.shortcut-copy { min-width: 0; display: flex; flex: 1; flex-direction: column; gap: 5px; }
+.shortcut-copy strong { overflow: hidden; color: var(--app-text-title); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.shortcut-copy small, .shortcut-arrow { color: var(--app-text-muted); }
+
+@media (max-width: 1200px) { .overview-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 900px) { .shortcut-grid { grid-template-columns: repeat(2, 1fr); } .hero-logo { opacity: 0.12; } }
+@media (max-width: 640px) {
+  .hero-panel { min-height: 250px; background-position: 62% center; }
+  .hero-logo { display: none; }
+  .overview-grid, .shortcut-grid { grid-template-columns: 1fr; }
+  .overview-card > span { min-height: 0; }
+}
+
+html.dark .hero-panel {
+  background:
+    linear-gradient(90deg, rgba(8, 24, 50, 0.98), rgba(10, 40, 78, 0.84)),
+    url('@/assets/brand/background.png') center / cover no-repeat;
+}
+html.dark .hero-copy h1 { color: #f8fbff; }
+html.dark .hero-copy p, html.dark .hero-meta { color: #c3d4ea; }
 </style>

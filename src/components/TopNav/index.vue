@@ -1,5 +1,6 @@
 <template>
   <el-menu
+    ref="topMenuRef"
     class="mix-topnav-menu"
     :default-active="activeMenu"
     mode="horizontal"
@@ -31,6 +32,14 @@
         </el-menu-item>
       </template>
     </el-sub-menu>
+
+    <div ref="measurementRef" class="mix-topnav-measurement" aria-hidden="true">
+      <span v-for="item in topMenus" :key="`measure-${item.path}`" data-menu-measure>
+        <svg-icon v-if="item.meta?.icon && item.meta.icon !== '#'" :icon-class="item.meta.icon" />
+        {{ item.meta?.title }}
+      </span>
+      <span data-overflow-measure>更多菜单</span>
+    </div>
   </el-menu>
 </template>
 
@@ -41,9 +50,13 @@ import { useAppStore } from '@/store/modules/app';
 import { usePermissionStore } from '@/store/modules/permission';
 import { useSettingsStore } from '@/store/modules/settings';
 import { isHttp } from '@/utils/validate';
+import { calculateVisibleMenuCount, observeTopNavLayout } from './layout';
 
-// 顶部栏初始数
-const visibleNumber = ref<number>(-1);
+const visibleNumber = ref<number>(0);
+const topMenuRef = ref<{ $el?: HTMLElement }>();
+const measurementRef = ref<HTMLElement>();
+let stopLayoutObserver: (() => void) | undefined;
+let layoutFrame = 0;
 // 隐藏侧边栏路由
 const hideList = ['/index', '/user/profile'];
 
@@ -118,11 +131,25 @@ const activeMenu = computed(() => {
 });
 
 const setVisibleNumber = () => {
-  let width = document.body.getBoundingClientRect().width;
-  if (width >= 1000) {
-    width -= 420;
-  }
-  visibleNumber.value = Math.max(1, Math.floor(width / 3 / 92) + 2);
+  cancelAnimationFrame(layoutFrame);
+  layoutFrame = requestAnimationFrame(() => {
+    const container = topMenuRef.value?.$el;
+    const measurement = measurementRef.value;
+    if (!container || !measurement) return;
+    const itemWidths = Array.from(measurement.querySelectorAll<HTMLElement>('[data-menu-measure]')).map(
+      item => item.getBoundingClientRect().width
+    );
+    const measuredOverflowWidth = measurement.querySelector<HTMLElement>('[data-overflow-measure]')?.getBoundingClientRect().width ?? 0;
+    const renderedOverflowWidth = container.querySelector<HTMLElement>(':scope > .el-sub-menu')?.getBoundingClientRect().width ?? 0;
+    const overflowWidth = Math.max(measuredOverflowWidth, renderedOverflowWidth);
+    const gap = Number.parseFloat(getComputedStyle(container).columnGap || getComputedStyle(container).gap) || 0;
+    visibleNumber.value = calculateVisibleMenuCount({
+      containerWidth: container.getBoundingClientRect().width,
+      itemWidths,
+      overflowWidth,
+      gap
+    });
+  });
 };
 
 const handleSelect = (key: string) => {
@@ -164,15 +191,27 @@ const activeRoutes = (key: string) => {
   return routes;
 };
 
-onMounted(() => {
-  window.addEventListener('resize', setVisibleNumber);
-});
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', setVisibleNumber);
+onMounted(async () => {
+  await nextTick();
+  const container = topMenuRef.value?.$el;
+  if (!container) return;
+  if (typeof ResizeObserver === 'undefined') {
+    window.addEventListener('resize', setVisibleNumber);
+    setVisibleNumber();
+    stopLayoutObserver = () => window.removeEventListener('resize', setVisibleNumber);
+    return;
+  }
+  stopLayoutObserver = observeTopNavLayout(container, setVisibleNumber, callback => {
+    const observer = new ResizeObserver(callback);
+    return observer;
+  });
 });
 
-onMounted(() => {
-  setVisibleNumber();
+watch(topMenus, () => nextTick(setVisibleNumber), { deep: true });
+
+onBeforeUnmount(() => {
+  stopLayoutObserver?.();
+  cancelAnimationFrame(layoutFrame);
 });
 </script>
 
@@ -194,9 +233,39 @@ onMounted(() => {
   padding: 0;
   border: none !important;
   background: transparent !important;
+  overflow: visible;
 
   &::after {
     display: none !important;
+  }
+}
+
+#app .mix-topnav-menu.el-menu--horizontal > .el-menu-item,
+#app .mix-topnav-menu.el-menu--horizontal > .el-sub-menu {
+  flex: 0 0 auto;
+}
+
+#app .mix-topnav-menu.el-menu--horizontal > .el-sub-menu {
+  min-width: max-content;
+  overflow: visible;
+}
+
+.mix-topnav-measurement {
+  position: absolute;
+  left: -100000px;
+  top: -100000px;
+  display: flex;
+  gap: 6px;
+  visibility: hidden;
+  pointer-events: none;
+
+  > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 18px;
+    white-space: nowrap;
+    font-size: var(--el-menu-item-font-size);
   }
 }
 
