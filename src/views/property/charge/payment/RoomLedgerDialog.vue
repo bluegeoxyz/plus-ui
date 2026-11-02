@@ -20,7 +20,6 @@ import type { PaymentVO } from '@/api/property/charge/payment/types';
 import { getReceivableSummary, listReceivable } from '@/api/property/charge/receivable';
 import type { ReceivableSummaryVO, ReceivableVO } from '@/api/property/charge/receivable/types';
 import type { RoomVO } from '@/api/property/resource/room/types';
-import auth from '@/plugins/auth';
 import { useDict } from '@/utils/dict';
 import PaymentDialog from './PaymentDialog.vue';
 import PaymentReverseDialog from './PaymentReverseDialog.vue';
@@ -30,7 +29,7 @@ const emit = defineEmits<{ openBinding: [room: RoomVO] }>();
 const { pm_payment_method, pm_payment_record_status, pm_payment_status } = toRefs<any>(useDict('pm_payment_method', 'pm_payment_record_status', 'pm_payment_status'));
 const visible = ref(false), loading = ref(false), detailVisible = ref(false), room = ref<RoomVO>(), receivables = ref<ReceivableVO[]>([]), payments = ref<PaymentVO[]>([]), detail = ref<PaymentVO>(), paymentDialog = ref<InstanceType<typeof PaymentDialog>>(), reverseDialog = ref<InstanceType<typeof PaymentReverseDialog>>();
 const summary = ref<ReceivableSummaryVO>({ receivableTotal: 0, paidTotal: 0, outstandingTotal: 0, overdueOutstandingTotal: 0 });
-const canCollect = computed(() => auth.hasPermiAnd(['property:payment:add', 'property:payment:allocate'])), cards = computed(() => [{ label: '累计应收', value: summary.value.receivableTotal }, { label: '累计已收', value: summary.value.paidTotal }, { label: '当前未收', value: summary.value.outstandingTotal }, { label: '逾期未收', value: summary.value.overdueOutstandingTotal }]); let version = 0;
+const canCollect = computed(() => false), cards = computed(() => [{ label: '累计应收', value: summary.value.receivableTotal }, { label: '累计已收', value: summary.value.paidTotal }, { label: '当前未收', value: summary.value.outstandingTotal }, { label: '逾期未收', value: summary.value.overdueOutstandingTotal }]); let version = 0;
 const money = (v?: number) => Number(v || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 async function refresh() { const p = props.projectId, roomId = room.value?.id, v = ++version; if (!p || !roomId) return; loading.value = true; try { const [sum, bills, receipts] = await Promise.all([getReceivableSummary({ projectId: p, roomId, pageNum: 1, pageSize: 1 }), listReceivable({ projectId: p, roomId, pageNum: 1, pageSize: 1000 }), listPayment({ projectId: p, roomId, pageNum: 1, pageSize: 1000 })]); if (v !== version || String(p) !== String(props.projectId) || String(roomId) !== String(room.value?.id)) return; summary.value = sum.data; receivables.value = bills.data.rows || []; payments.value = receipts.data.rows || []; } finally { if (v === version) loading.value = false; } }
 async function open(target: Partial<RoomVO>) { if (!target.id) return; room.value = target as RoomVO; visible.value = true; await refresh(); }

@@ -1,3 +1,77 @@
-export interface InventoryVO { id: number | string; companyId: number | string; companyName?: string; warehouseId: number | string; warehouseName: string; zoneId: number | string; zoneName: string; locationId: number | string; locationCode: string; locationName: string; materialId: number | string; materialCode: string; materialName: string; specification?: string; model?: string; categoryId: number | string; categoryName?: string; baseUnitName: string; baseUnitSymbol?: string; quantity: number; lockedQuantity: number; availableQuantity: number; safetyStock: number; version: number }
-export interface InventorySummaryVO { companyId: number | string; companyName?: string; warehouseId: number | string; warehouseName: string; materialId: number | string; materialCode: string; materialName: string; specification?: string; model?: string; categoryId: number | string; categoryName?: string; baseUnitName: string; baseUnitSymbol?: string; quantity: number; lockedQuantity: number; availableQuantity: number; safetyStock: number; lowStock: boolean }
-export interface InventoryQuery extends PageQuery { companyId?: number | string; warehouseId?: number | string; zoneId?: number | string; locationId?: number | string; materialCode?: string; materialName?: string; categoryId?: number | string; zeroStock?: boolean; lowStock?: boolean }
+export interface InventoryVO {
+  id: number | string;
+  companyId: number | string;
+  companyName?: string;
+  warehouseId: number | string;
+  warehouseName: string;
+  zoneId: number | string;
+  zoneName: string;
+  locationId: number | string;
+  locationCode: string;
+  locationName: string;
+  materialId: number | string;
+  materialCode: string;
+  materialName: string;
+  specification?: string;
+  model?: string;
+  categoryId: number | string;
+  categoryName?: string;
+  baseUnitName: string;
+  baseUnitSymbol?: string;
+  quantity: number | string;
+  lockedQuantity: number | string;
+  availableQuantity: number | string;
+  safetyStock: number | string;
+  upperStock: number | string;
+  lowStock: boolean;
+  highStock: boolean;
+  monitored: boolean;
+  disabled: boolean;
+  warehouseStatus: string;
+  materialStatus: string;
+  thresholdSource: string;
+  precisionScale: number;
+  version: number;
+}
+export interface InventorySummaryVO {
+  companyId: number | string;
+  companyName?: string;
+  warehouseId: number | string;
+  warehouseName: string;
+  materialId: number | string;
+  materialCode: string;
+  materialName: string;
+  specification?: string;
+  model?: string;
+  categoryId: number | string;
+  categoryName?: string;
+  baseUnitName: string;
+  baseUnitSymbol?: string;
+  quantity: number | string;
+  lockedQuantity: number | string;
+  availableQuantity: number | string;
+  safetyStock: number | string;
+  upperStock: number | string;
+  highStock: boolean;
+  monitored: boolean;
+  disabled: boolean;
+  warehouseStatus: string;
+  materialStatus: string;
+  thresholdSource: string;
+  precisionScale: number;
+  lowStock: boolean;
+}
+export interface InventoryQuery extends PageQuery {
+  materialId?: number | string;
+  riskType?: 'LOW' | 'HIGH' | 'BOTH' | 'NORMAL' | 'WARNING';
+  highStock?: boolean;
+  companyId?: number | string;
+  warehouseId?: number | string;
+  zoneId?: number | string;
+  locationId?: number | string;
+  materialCode?: string;
+  materialName?: string;
+  categoryId?: number | string;
+  zeroStock?: boolean;
+  lowStock?: boolean;
+}

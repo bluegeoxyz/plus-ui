@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const apiMocks = vi.hoisted(() => ({ workspaceProjectOptions: vi.fn() }));
 const userState = vi.hoisted(() => ({ userId: '100', permissions: [] as string[] }));
@@ -22,9 +22,15 @@ describe('current project workspace', () => {
       removeItem: (key: string) => storage.delete(key)
     });
     vi.stubGlobal('window', { dispatchEvent: vi.fn() });
-    vi.stubGlobal('CustomEvent', class {
-      constructor(public type: string, public init?: unknown) {}
-    });
+    vi.stubGlobal(
+      'CustomEvent',
+      class {
+        constructor(
+          public type: string,
+          public init?: unknown
+        ) {}
+      }
+    );
     setActivePinia(createPinia());
     userState.userId = '100';
     userState.permissions = [];
@@ -74,6 +80,28 @@ describe('current project workspace', () => {
 
     expect(store.currentProjectId).toBe('9007199254740993');
     expect(store.locked).toBe(true);
+  });
+
+  it('loads workspace for a finance user with only settlement permission', async () => {
+    userState.permissions = ['property:collectionWriteOff:list'];
+    apiMocks.workspaceProjectOptions.mockResolvedValue({
+      data: [{ id: '5', projectCode: 'F', projectName: '财务项目' }]
+    });
+    const store = useCurrentProjectStore();
+    await store.initialize();
+    expect(store.required).toBe(true);
+    expect(store.currentProjectId).toBe('5');
+  });
+
+  it('loads workspace for a supervisor with only review permission', async () => {
+    userState.permissions = ['property:collectionReview:list'];
+    apiMocks.workspaceProjectOptions.mockResolvedValue({
+      data: [{ id: '4', projectCode: 'R', projectName: '审核项目' }]
+    });
+    const store = useCurrentProjectStore();
+    await store.initialize();
+    expect(store.required).toBe(true);
+    expect(store.currentProjectId).toBe('4');
   });
 
   it('does not select the first of multiple projects', async () => {

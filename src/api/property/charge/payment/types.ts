@@ -31,8 +31,28 @@ export interface PaymentRoomOptionVO {
   earliestDueDate?: string;
 }
 
-export interface PaymentCustomerOptionVO { id:number|string; customerNo:string; customerType:string; customerName:string; mobile?:string; }
-export interface PaymentReceivableOptionVO { id:number|string; receivableNo:string; projectId:number|string; roomId:number|string; chargeItemNameSnapshot?:string; responsibleCustomerNameSnapshot?:string; periodStartDate:string; periodEndDate:string; dueDate:string; receivableAmount:number; paidAmount:number; outstandingAmount:number; paymentStatus:string; }
+export interface PaymentCustomerOptionVO {
+  id: number | string;
+  customerNo: string;
+  customerType: string;
+  customerName: string;
+  mobile?: string;
+}
+export interface PaymentReceivableOptionVO {
+  id: number | string;
+  receivableNo: string;
+  projectId: number | string;
+  roomId: number | string;
+  chargeItemNameSnapshot?: string;
+  responsibleCustomerNameSnapshot?: string;
+  periodStartDate: string;
+  periodEndDate: string;
+  dueDate: string;
+  receivableAmount: number;
+  paidAmount: number;
+  outstandingAmount: number;
+  paymentStatus: string;
+}
 
 export interface PaymentAllocationVO {
   id: number | string;
@@ -86,6 +106,13 @@ export interface PaymentReverseResultVO {
 }
 
 export interface PaymentVO extends BaseEntity {
+  sourceRegistrationId?: string | number;
+  sourceRegistrationNo?: string;
+  sourceType?: string;
+  collectorUserId?: string | number;
+  reviewerUserId?: string | number;
+  writerUserId?: string | number;
+  writtenOffAt?: string;
   id: number | string;
   projectId: number | string;
   projectName?: string;

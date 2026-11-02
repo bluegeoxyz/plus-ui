@@ -23,7 +23,12 @@ export const PROPERTY_WORKSPACE_PERMISSIONS = [
   'property:receivable:list',
   'property:receivable:generate',
   'property:payment:list',
-  'property:payment:add'
+  'property:payment:add',
+  'property:collectionWriteOff:list',
+  'property:collectionReview:list',
+  'property:collectionRegistration:list',
+  'property:collectionRegistration:add',
+  'property:collectionRegistration:edit'
 ] as const;
 
 export const requiresPropertyWorkspace = (permissions: string[]) =>

@@ -51,6 +51,14 @@
         <el-form-item v-else label="库存状态">
           <el-checkbox v-model="queryParams.lowStock">仅看低库存</el-checkbox>
         </el-form-item>
+        <el-form-item label="风险类型">
+          <el-select v-model="queryParams.riskType" clearable class="w-40">
+            <el-option label="低库存" value="LOW" />
+            <el-option label="高库存" value="HIGH" />
+            <el-option label="高低双风险" value="BOTH" />
+            <el-option label="正常库存" value="NORMAL" />
+          </el-select>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
           <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -96,7 +104,18 @@
         <el-table-column label="当前数量" prop="quantity" width="110" align="right" />
         <el-table-column label="锁定数量" prop="lockedQuantity" width="110" align="right" />
         <el-table-column label="可用数量" prop="availableQuantity" width="110" align="right" />
-        <el-table-column label="安全库存" prop="safetyStock" width="110" align="right" />
+        <el-table-column label="库存下限" prop="safetyStock" width="110" align="right" />
+        <el-table-column label="库存上限" prop="upperStock" width="110" align="right" />
+        <el-table-column label="全仓风险" min-width="180">
+          <template #default="s">
+            <el-tag v-if="s.row.lowStock" type="danger">低库存</el-tag>
+            <el-tag v-if="s.row.highStock" type="warning">高库存</el-tag>
+            <el-tag v-if="!s.row.lowStock && !s.row.highStock" :type="s.row.monitored ? 'success' : 'info'">
+              {{ s.row.monitored ? '正常' : '未监控' }}
+            </el-tag>
+            <el-tag v-if="s.row.disabled" type="info">含停用资源</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="80" fixed="right">
           <template #default="s">
             <el-button v-hasPermi="['warehouse:inventory:query']" link type="primary" @click="showDetail(s.row.id)">
@@ -116,10 +135,16 @@
         <el-table-column label="当前数量" prop="quantity" width="110" align="right" />
         <el-table-column label="锁定数量" prop="lockedQuantity" width="110" align="right" />
         <el-table-column label="可用数量" prop="availableQuantity" width="110" align="right" />
-        <el-table-column label="安全库存" prop="safetyStock" width="110" align="right" />
-        <el-table-column label="库存状态" width="100">
+        <el-table-column label="库存下限" prop="safetyStock" width="110" align="right" />
+        <el-table-column label="库存上限" prop="upperStock" width="110" align="right" />
+        <el-table-column label="全仓风险" min-width="180">
           <template #default="s">
-            <el-tag :type="s.row.lowStock ? 'danger' : 'success'">{{ s.row.lowStock ? '库存不足' : '正常' }}</el-tag>
+            <el-tag v-if="s.row.lowStock" type="danger">低库存</el-tag>
+            <el-tag v-if="s.row.highStock" type="warning">高库存</el-tag>
+            <el-tag v-if="!s.row.lowStock && !s.row.highStock" :type="s.row.monitored ? 'success' : 'info'">
+              {{ s.row.monitored ? '正常' : '未监控' }}
+            </el-tag>
+            <el-tag v-if="s.row.disabled" type="info">含停用资源</el-tag>
           </template>
         </el-table-column>
       </el-table>
@@ -146,6 +171,8 @@
   </div>
 </template>
 <script setup name="Inventory" lang="ts">
+import { computed, getCurrentInstance, onMounted, reactive, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import type {
   ContextCompanyOptionVO,
   ContextMaterialCategoryOptionVO,
@@ -165,9 +192,11 @@ import {
   listInventorySummary
 } from '@/api/warehouse/inventory';
 import { useSearchToggle } from '@/hooks/form/useSearchToggle';
+import auth from '@/plugins/auth';
 import { download } from '@/utils/request';
 const { showSearch } = useSearchToggle();
 const { proxy } = getCurrentInstance() as ComponentInternalInstance;
+const route = useRoute();
 const mode = ref<'detail' | 'summary'>('detail');
 const loading = ref(false);
 const total = ref(0);
@@ -183,10 +212,24 @@ const locations = ref<DocumentLocationOptionVO[]>([]);
 const categories = ref<ContextMaterialCategoryOptionVO[]>([]);
 const treeProps = { value: 'id', label: 'categoryName', children: 'children' };
 const queryParams = reactive<InventoryQuery>({ pageNum: 1, pageSize: 10 });
+const applyRouteFilters = () => {
+  queryParams.warehouseId = typeof route.query.warehouseId === 'string' ? route.query.warehouseId : undefined;
+  queryParams.materialId = typeof route.query.materialId === 'string' ? route.query.materialId : undefined;
+};
+applyRouteFilters();
+watch(
+  () => [route.query.warehouseId, route.query.materialId],
+  () => {
+    applyRouteFilters();
+    queryParams.pageNum = 1;
+    void getList();
+  }
+);
 const filteredWarehouses = computed(() =>
   queryParams.companyId ? warehouses.value.filter(w => w.companyId === queryParams.companyId) : warehouses.value
 );
 const getList = async () => {
+  if (!auth.hasPermi('warehouse:inventory:list')) return;
   loading.value = true;
   try {
     if (mode.value === 'detail') {
@@ -243,6 +286,14 @@ const handleQuery = () => {
 };
 const resetQuery = async () => {
   queryRef.value?.resetFields();
+  queryParams.materialId = undefined;
+  queryParams.materialCode = undefined;
+  queryParams.materialName = undefined;
+  queryParams.categoryId = undefined;
+  queryParams.zeroStock = undefined;
+  queryParams.lowStock = undefined;
+  queryParams.riskType = undefined;
+  queryParams.companyId = undefined;
   await companyChanged();
   handleQuery();
 };
@@ -250,14 +301,17 @@ const modeChanged = () => {
   queryParams.pageNum = 1;
   queryParams.zeroStock = undefined;
   queryParams.lowStock = undefined;
+  queryParams.riskType = undefined;
   getList();
 };
 const showDetail = async (id: number | string) => {
+  if (!auth.hasPermi('warehouse:inventory:query')) return;
   detail.value = (await getInventory(id)).data;
   detailVisible.value = true;
 };
 const handleExport = () => download('/warehouse/inventory/export', { ...queryParams }, `实时库存_${Date.now()}.xlsx`);
 const loadInitialOptions = async () => {
+  if (!auth.hasPermiOr(['warehouse:inventory:list', 'warehouse:inventory:query'])) return;
   try {
     companies.value = (await inventoryCompanyOptions()).data || [];
   } catch {
